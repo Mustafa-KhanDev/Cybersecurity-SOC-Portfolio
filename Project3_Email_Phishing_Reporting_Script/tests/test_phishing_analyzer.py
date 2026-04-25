@@ -24,8 +24,8 @@ class TestPhishingAnalyzer(unittest.TestCase):
 
     def test_extract_subject(self):
         class MockMsg:
-            def get(self, header):
-                return "Test Subject" if header == 'Subject' else None
+            def get(self, header, default=None):
+                return "Test Subject" if header == 'Subject' else default
 
         msg = MockMsg()
         subject = self.analyzer.extract_subject(msg)
