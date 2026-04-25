@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test-python:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    - name: Install dependencies
+      run: |
+        cd Project3_Email_Phishing_Reporting_Script/src
+        pip install -r requirements.txt
+    - name: Run Python tests
+      run: |
+        cd Project3_Email_Phishing_Reporting_Script
+        python -m pytest tests/ -v
+
+  test-powershell:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Run PowerShell tests
+      run: |
+        cd Project4_Suspicious_Process_Detector/tests
+        powershell.exe -ExecutionPolicy Bypass -File test_suspicious_processes.ps1
+    - name: Validate Azure roles
+      run: |
+        cd Project5_Cloud_Least_Privilege_IAM_Policy/tests
+        powershell.exe -ExecutionPolicy Bypass -File validate_roles.ps1
+
+  validate-configs:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Validate JSON files
+      run: |
+        find . -name "*.json" -exec python -m json.tool {} \; > /dev/null
+    - name: Check PowerShell syntax
+      run: |
+        find . -name "*.ps1" -exec pwsh -Command "try { \$null = [System.Management.Automation.PSParser]::Tokenize((Get-Content '{}'), [ref]\$null); Write-Host '{}: OK' } catch { Write-Host '{}: FAILED' }" \;
