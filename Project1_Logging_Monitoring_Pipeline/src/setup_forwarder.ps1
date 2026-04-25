@@ -14,13 +14,32 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
     exit 1
 }
 
-# Install Splunk Forwarder
-Write-Host "Installing Splunk Universal Forwarder..."
-Start-Process msiexec.exe -ArgumentList "/i $SplunkInstallerPath /quiet AGREETOLICENSE=Yes" -Wait
+# Check if Splunk installer exists
+if (-not (Test-Path $SplunkInstallerPath)) {
+    Write-Host "Error: Splunk installer not found at $SplunkInstallerPath" -ForegroundColor Red
+    exit 1
+}
+
+# Validate indexer IP format
+if ($IndexerIP -notmatch '^(\d{1,3}\.){3}\d{1,3}$') {
+    Write-Host "Error: Invalid indexer IP format: $IndexerIP" -ForegroundColor Red
+    exit 1
+}
+
+# Validate port
+if ($IndexerPort -lt 1 -or $IndexerPort -gt 65535) {
+    Write-Host "Error: Invalid port number: $IndexerPort" -ForegroundColor Red
+    exit 1
+}
 
 # Set admin password
 Write-Host "Setting admin password..."
-& "C:\Program Files\SplunkUniversalForwarder\bin\splunk.exe" edit user admin -password $AdminPassword -auth admin:changeme
+try {
+    & "C:\Program Files\SplunkUniversalForwarder\bin\splunk.exe" edit user admin -password $AdminPassword -auth admin:changeme
+    Write-Host "Password set successfully."
+} catch {
+    Write-Host "Warning: Could not set password automatically. You may need to set it manually." -ForegroundColor Yellow
+}
 
 # Copy configs
 Write-Host "Configuring inputs and outputs..."
@@ -35,6 +54,12 @@ $outputsContent | Set-Content "C:\Program Files\SplunkUniversalForwarder\etc\sys
 
 # Start Splunk Forwarder
 Write-Host "Starting Splunk Forwarder..."
-& "C:\Program Files\SplunkUniversalForwarder\bin\splunk.exe" start
+try {
+    & "C:\Program Files\SplunkUniversalForwarder\bin\splunk.exe" start
+    Write-Host "Splunk Forwarder started successfully."
+} catch {
+    Write-Host "Error: Failed to start Splunk Forwarder: $_" -ForegroundColor Red
+    exit 1
+}
 
 Write-Host "Setup complete. Forwarder is sending logs to $IndexerIP:$IndexerPort"

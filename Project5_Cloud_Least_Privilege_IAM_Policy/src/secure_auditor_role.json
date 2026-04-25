@@ -1,0 +1,24 @@
+{
+  "Name": "Secure Auditor",
+  "IsCustom": true,
+  "Description": "Read-only role for security auditors with access to logs and configurations.",
+  "Actions": [
+    "Microsoft.Storage/storageAccounts/read",
+    "Microsoft.Compute/virtualMachines/read",
+    "Microsoft.Network/virtualNetworks/read",
+    "Microsoft.KeyVault/vaults/read",
+    "Microsoft.KeyVault/vaults/secrets/read",
+    "Microsoft.Authorization/roleAssignments/read",
+    "Microsoft.Authorization/policyAssignments/read",
+    "Microsoft.Insights/logs/read",
+    "Microsoft.Security/*/read",
+    "Microsoft.Sql/servers/auditingSettings/read",
+    "Microsoft.Sql/servers/databases/auditingSettings/read"
+  ],
+  "NotActions": [],
+  "DataActions": [],
+  "NotDataActions": [],
+  "AssignableScopes": [
+    "/subscriptions/your-subscription-id"
+  ]
+}

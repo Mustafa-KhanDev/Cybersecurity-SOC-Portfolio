@@ -6,7 +6,7 @@ Advanced tool for extracting and analyzing phishing email artifacts.
 
 import sys
 import re
-import json
+import csv
 import logging
 import argparse
 from email import policy
@@ -51,10 +51,23 @@ class PhishingAnalyzer:
         return msg.get('Subject', 'No Subject')
 
     def extract_urls_and_hashes(self, text: str) -> tuple[List[str], List[str]]:
-        """Extract URLs and hashes from text."""
-        urls = re.findall(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', text)
-        hashes = re.findall(r'\b[a-fA-F0-9]{32}\b|\b[a-fA-F0-9]{40}\b|\b[a-fA-F0-9]{64}\b', text)
-        return urls, hashes
+        """Extract URLs and hashes from text with improved regex."""
+        # Improved URL regex to catch more variations
+        url_pattern = r'https?://(?:[-\w.])+(?:[:\d]+)?(?:/(?:[\w/_.])*(?:\?(?:[\w&=%.])*)?(?:#(?:\w*))?)?'
+        urls = re.findall(url_pattern, text, re.IGNORECASE)
+
+        # Hash patterns for MD5, SHA1, SHA256, SHA512
+        hash_patterns = [
+            r'\b[a-fA-F0-9]{32}\b',    # MD5
+            r'\b[a-fA-F0-9]{40}\b',    # SHA1
+            r'\b[a-fA-F0-9]{64}\b',    # SHA256
+            r'\b[a-fA-F0-9]{128}\b'    # SHA512
+        ]
+        hashes = []
+        for pattern in hash_patterns:
+            hashes.extend(re.findall(pattern, text))
+
+        return list(set(urls)), list(set(hashes))  # Remove duplicates
 
     def extract_attachments(self, msg) -> List[Dict]:
         """Extract attachment information."""
@@ -115,17 +128,29 @@ class PhishingAnalyzer:
         self.logger.info(f"Analysis complete for {eml_file}")
         return result
 
-    def save_report(self, results: List[Dict], output_file: Path):
-        """Save analysis results to JSON file."""
-        with open(output_file, 'w', encoding='utf-8') as f:
-            json.dump(results, f, indent=2, ensure_ascii=False)
-        self.logger.info(f"Report saved to {output_file}")
+    def save_report(self, results: List[Dict], output_file: Path, format: str = 'json'):
+        """Save analysis results in specified format."""
+        if format.lower() == 'json':
+            with open(output_file, 'w', encoding='utf-8') as f:
+                json.dump(results, f, indent=2, ensure_ascii=False)
+        elif format.lower() == 'csv':
+            if results:
+                fieldnames = results[0].keys()
+                with open(output_file, 'w', newline='', encoding='utf-8') as f:
+                    writer = csv.DictWriter(f, fieldnames=fieldnames)
+                    writer.writeheader()
+                    writer.writerows(results)
+        else:
+            raise ValueError(f"Unsupported format: {format}")
+        self.logger.info(f"Report saved to {output_file} in {format.upper()} format")
 
 def main():
     parser = argparse.ArgumentParser(description='Email Phishing Analyzer')
     parser.add_argument('eml_files', nargs='+', type=Path, help='EML files to analyze')
+    parser.add_argument('-f', '--format', choices=['json', 'csv'], default='json',
+                        help='Output format (default: json)')
     parser.add_argument('-o', '--output', type=Path, default=Path('phishing_report.json'),
-                        help='Output JSON file')
+                        help='Output file path')
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose logging')
     parser.add_argument('-q', '--quiet', action='store_true', help='Quiet mode')
 
@@ -144,9 +169,9 @@ def main():
             analyzer.logger.error(f"File not found: {eml_file}")
 
     if results:
-        analyzer.save_report(results, args.output)
+        analyzer.save_report(results, args.output, args.format)
         print(f"Analysis complete. Processed {len(results)} emails.")
-        print(f"Report saved to {args.output}")
+        print(f"Report saved to {args.output} in {args.format.upper()} format")
     else:
         print("No emails processed successfully.")
 

@@ -37,11 +37,16 @@ $DefaultSuspiciousPaths = @(
     "$env:APPDATA",
     "$env:LOCALAPPDATA",
     "C:\Windows\Temp",
-    "C:\Temp"
+    "C:\Temp",
+    "C:\Users\Public",
+    "C:\ProgramData",
+    "C:\Windows\System32\spool\drivers\color"  # Common malware location
 )
 
 $SuspiciousPaths = $Config.suspiciousPaths ?? $DefaultSuspiciousPaths
 $MaxReportSize = $Config.maxReportSize ?? 1000
+$HighCpuThreshold = $Config.highCpuThreshold ?? 80
+$HighMemoryThreshold = $Config.highMemoryThreshold ?? 500  # MB
 
 function Write-Log {
     param([string]$Message, [string]$Level = "Information")
@@ -76,11 +81,43 @@ $suspiciousCount = 0
 
 foreach ($proc in $processes) {
     $isSuspicious = $false
+    $suspicionReasons = @()
+
+    # Check path
     foreach ($path in $SuspiciousPaths) {
         if ($proc.Path -like "$path*") {
             $isSuspicious = $true
-            break
+            $suspicionReasons += "Suspicious path: $path"
         }
+    }
+
+    # Check high CPU usage
+    if ($proc.CPU -gt $HighCpuThreshold) {
+        $isSuspicious = $true
+        $suspicionReasons += "High CPU usage: $($proc.CPU)%"
+    }
+
+    # Check high memory usage
+    $memoryMB = [math]::Round($proc.WorkingSet / 1MB, 2)
+    if ($memoryMB -gt $HighMemoryThreshold) {
+        $isSuspicious = $true
+        $suspicionReasons += "High memory usage: $memoryMB MB"
+    }
+
+    # Check if process is excluded
+    $excluded = $false
+    if ($Config.excludeProcesses) {
+        foreach ($exclude in $Config.excludeProcesses) {
+            if ($proc.Name -like "*$exclude*") {
+                $excluded = $true
+                break
+            }
+        }
+    }
+
+    if ($excluded) {
+        $isSuspicious = $false
+        $suspicionReasons = @()
     }
 
     $processInfo = @{
@@ -90,6 +127,7 @@ foreach ($proc in $processes) {
         start_time = $proc.StartTime
         cpu = $proc.CPU
         memory_mb = [math]::Round($proc.WorkingSet / 1MB, 2)
+        suspicion_reasons = $suspicionReasons
     }
 
     if ($isSuspicious) {
