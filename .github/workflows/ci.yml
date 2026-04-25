@@ -18,7 +18,7 @@ jobs:
     - name: Install dependencies
       run: |
         cd Project3_Email_Phishing_Reporting_Script/src
-        pip install -r requirements.txt
+        pip install pytest
     - name: Run Python tests
       run: |
         cd Project3_Email_Phishing_Reporting_Script
