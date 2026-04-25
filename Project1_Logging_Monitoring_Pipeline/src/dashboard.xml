@@ -1,0 +1,58 @@
+<form>
+  <label>SIEM Dashboard</label>
+  <fieldset submitButton="false">
+    <input type="time" token="time">
+      <label>Time Range</label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Failed Logins</title>
+      <chart>
+        <search>
+          <query>index=main sourcetype="WinEventLog:Security" EventCode=4625 | timechart count</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="charting.chart">line</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Process Creations</title>
+      <chart>
+        <search>
+          <query>index=main sourcetype="WinEventLog:Security" EventCode=4688 | timechart count</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="charting.chart">line</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Top Failed Login Users</title>
+      <table>
+        <search>
+          <query>index=main sourcetype="WinEventLog:Security" EventCode=4625 | top limit=10 Account_Name</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+      </table>
+    </panel>
+    <panel>
+      <title>Recent Process Executions</title>
+      <table>
+        <search>
+          <query>index=main sourcetype="WinEventLog:Security" EventCode=4688 | table _time, New_Process_Name, Creator_Process_Name | head 20</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+      </table>
+    </panel>
+  </row>
+</form>

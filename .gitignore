@@ -1,0 +1,54 @@
+# Logs
+*.log
+logs/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# PowerShell
+*.ps1xml
+*.clixml
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Secrets and configs (don't commit real ones)
+config.json
+*.key
+*.pem
+secrets/
+
+# Build outputs
+dist/
+build/
+
+# Test outputs
+test_results/
+*.test

@@ -1,0 +1,21 @@
+{
+  "Name": "Secure Baseline User",
+  "IsCustom": true,
+  "Description": "A least-privilege role for standard users with read-only access to essential resources.",
+  "Actions": [
+    "Microsoft.Storage/storageAccounts/read",
+    "Microsoft.Compute/virtualMachines/read",
+    "Microsoft.Network/virtualNetworks/read",
+    "Microsoft.KeyVault/vaults/secrets/read",
+    "Microsoft.Authorization/roleAssignments/read",
+    "Microsoft.Resources/subscriptions/resourceGroups/read",
+    "Microsoft.Sql/servers/databases/read",
+    "Microsoft.Web/sites/read"
+  ],
+  "NotActions": [],
+  "DataActions": [],
+  "NotDataActions": [],
+  "AssignableScopes": [
+    "/subscriptions/your-subscription-id"
+  ]
+}

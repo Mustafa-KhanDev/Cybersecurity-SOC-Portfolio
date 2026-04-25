@@ -1,0 +1,26 @@
+{
+  "Name": "Secure Developer",
+  "IsCustom": true,
+  "Description": "Least-privilege role for developers with access to deploy and manage applications.",
+  "Actions": [
+    "Microsoft.Storage/storageAccounts/read",
+    "Microsoft.Storage/storageAccounts/write",
+    "Microsoft.Compute/virtualMachines/read",
+    "Microsoft.Web/sites/*",
+    "Microsoft.Sql/servers/databases/*",
+    "Microsoft.KeyVault/vaults/secrets/read",
+    "Microsoft.Authorization/roleAssignments/read",
+    "Microsoft.Resources/subscriptions/resourceGroups/read",
+    "Microsoft.Resources/deployments/*"
+  ],
+  "NotActions": [
+    "Microsoft.Authorization/*/write",
+    "Microsoft.Network/*/write",
+    "Microsoft.Compute/disks/delete"
+  ],
+  "DataActions": [],
+  "NotDataActions": [],
+  "AssignableScopes": [
+    "/subscriptions/your-subscription-id"
+  ]
+}

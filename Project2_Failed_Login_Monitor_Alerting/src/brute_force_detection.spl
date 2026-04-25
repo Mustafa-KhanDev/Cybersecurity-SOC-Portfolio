@@ -1,0 +1,5 @@
+index=main sourcetype="WinEventLog:Security" (EventCode=4625 OR EventCode=4624)
+| sort 0 _time
+| streamstats window=6 current=f global=f count(eval(EventCode==4625)) as failed_count by src_ip
+| where EventCode==4624 AND failed_count >=5
+| table _time, src_ip, user, failed_count
