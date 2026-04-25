@@ -60,6 +60,8 @@ cd Cybersecurity-SOC-Portfolio
 | Process Detector | ✅ Complete | ✅ | ✅ |
 | Azure IAM | ✅ Complete | ✅ | ✅ |
 
+**CI Status**: All tests passing ✅
+
 ## 🛠️ Tech Stack
 
 - **Languages**: Python, PowerShell, SPL, JSON
