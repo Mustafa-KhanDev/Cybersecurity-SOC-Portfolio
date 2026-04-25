@@ -8,7 +8,7 @@ $MockProcesses = @(
 )
 
 Write-Host "Testing Suspicious Process Detector..."
-Write-Host "=" * 50
+Write-Host "=================================================="
 
 # Test configuration loading
 $configPath = "..\src\config.json"
